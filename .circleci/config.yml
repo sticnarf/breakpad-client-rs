@@ -1,9 +1,12 @@
 version: 2
 
+defaults: &defaults
+  docker:
+    - image: rust:1
+
 jobs:
   test:
-    docker:
-      - image: rust:1
+    <<: *defaults
     steps:
       - checkout
       - run:
@@ -28,3 +31,9 @@ jobs:
       - run:
           name: Run all tests
           command: cargo test --all
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
