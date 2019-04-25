@@ -1,0 +1,8 @@
+[package]
+name = "breakpad-example"
+version = "0.1.0"
+authors = ["Yilin Chen <sticnarf@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+breakpad-client = { path = "../breakpad-client" }

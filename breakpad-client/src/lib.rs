@@ -4,6 +4,7 @@ use std::os::raw::c_void;
 use std::os::unix::ffi::OsStrExt;
 use std::os::unix::io::{FromRawFd, RawFd};
 use std::path::PathBuf;
+use std::ptr::null_mut;
 
 pub enum MinidumpDescriptor {
     Directory(PathBuf),
@@ -30,9 +31,9 @@ pub struct ExceptionHandler<C> {
 }
 
 impl<C> ExceptionHandler<C> {
-    pub fn new(descriptor: MinidumpDescriptor) -> Self {
+    pub fn new(descriptor: impl Into<MinidumpDescriptor>) -> Self {
         ExceptionHandler {
-            descriptor,
+            descriptor: descriptor.into(),
             context: None,
             filter: None,
             callback: None,
@@ -67,7 +68,7 @@ impl<C> ExceptionHandler<C> {
                         c_path.as_ptr(),
                         None,
                         None,
-                        &mut () as *mut _ as *mut c_void,
+                        null_mut() as *mut c_void,
                     );
                 }
             }

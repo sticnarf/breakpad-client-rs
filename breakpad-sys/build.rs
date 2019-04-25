@@ -10,9 +10,6 @@ fn main() -> io::Result<()> {
         .enable_cxx_namespaces()
         .clang_args(&["-x", "c++", "-I", "breakpad/src"])
         .header("breakpad_c.h")
-        .header("breakpad/src/client/linux/handler/exception_handler.h")
-        .whitelist_type("google_breakpad::MinidumpDescriptor")
-        .whitelist_type("google_breakpad::ExceptionHandler")
         .whitelist_function("register_handler_from_path")
         .whitelist_function("register_handler_from_fd")
         .generate()
@@ -21,12 +18,6 @@ fn main() -> io::Result<()> {
     bindings
         .write_to_file(dst.join("bindings.rs"))
         .expect("Couldn't write bindings!");
-
-    cc::Build::new()
-        .cpp(true)
-        .include("breakpad/src")
-        .file("breakpad_c.cpp")
-        .compile("breakpad_c.a");
 
     // configure
     if !Command::new(root.join("breakpad/configure"))
@@ -41,11 +32,17 @@ fn main() -> io::Result<()> {
         panic!("make failed");
     }
 
-    println!("cargo:rustc-link-lib=static=breakpad");
+    cc::Build::new()
+        .cpp(true)
+        .include("breakpad/src")
+        .file("breakpad_c.cpp")
+        .compile("libbreakpad_c.a");
+
+    println!("cargo:rustc-link-lib=static=breakpad_client");
     println!("cargo:rustc-link-lib=static=breakpad_c");
     println!(
         "cargo:rustc-link-search=native={}",
-        dst.join("src/").to_str().unwrap()
+        dst.join("src/client/linux").to_str().unwrap()
     );
     println!("cargo:rustc-link-search=native={}", dst.to_str().unwrap());
 

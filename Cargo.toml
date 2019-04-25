@@ -3,4 +3,5 @@
 members = [
     "breakpad-sys",
     "breakpad-client",
+    "breakpad-example",
 ]

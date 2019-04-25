@@ -1,4 +1,5 @@
 #include <string>
+#include <cstdio>
 #include "breakpad_c.h"
 
 void register_handler_from_path(const char *c_path,
@@ -6,7 +7,8 @@ void register_handler_from_path(const char *c_path,
                                 MinidumpCallback callback,
                                 void *callback_context) {
     google_breakpad::MinidumpDescriptor descriptor(c_path);
-    google_breakpad::ExceptionHandler eh(descriptor, filter, callback, callback_context, true, -1);
+    // Prevent calling its destructure
+    new google_breakpad::ExceptionHandler(descriptor, filter, callback, callback_context, true, -1);
 }
 
 void register_handler_from_fd(int fd,
@@ -14,5 +16,6 @@ void register_handler_from_fd(int fd,
                               MinidumpCallback callback,
                               void *callback_context) {
     google_breakpad::MinidumpDescriptor descriptor(fd);
-    google_breakpad::ExceptionHandler eh(descriptor, filter, callback, callback_context, true, -1);
+    // Prevent calling its destructure
+    new google_breakpad::ExceptionHandler(descriptor, filter, callback, callback_context, true, -1);
 }
