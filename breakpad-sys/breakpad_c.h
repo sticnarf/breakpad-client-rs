@@ -22,9 +22,9 @@ void register_handler_from_path(const char *c_path,
                                 WrappedMinidumpCallback callback,
                                 void *callback_context);
 
-//void register_handler_from_fd(int fd,
-//                              FilterCallback filter,
-//                              WrappedMinidumpCallback callback,
-//                              void *callback_context);
+void register_handler_from_fd(int fd,
+                              FilterCallback filter,
+                              WrappedMinidumpCallback callback,
+                              void *callback_context);
 }
 
