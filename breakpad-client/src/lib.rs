@@ -1,4 +1,4 @@
-use breakpad_sys::root::{register_handler_from_fd, register_handler_from_path};
+use breakpad_sys::register_handler_from_path;
 use std::ffi::CString;
 use std::os::raw::c_void;
 use std::os::unix::ffi::OsStrExt;

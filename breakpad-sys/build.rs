@@ -6,19 +6,6 @@ fn main() -> io::Result<()> {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let dst = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    let bindings = bindgen::Builder::default()
-        .enable_cxx_namespaces()
-        .clang_args(&["-x", "c++", "-I", "breakpad/src"])
-        .header("breakpad_c.h")
-        .whitelist_function("register_handler_from_path")
-        .whitelist_function("register_handler_from_fd")
-        .generate()
-        .expect("Unable to generate bindings");
-
-    bindings
-        .write_to_file(dst.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
-
     // configure
     if !Command::new(root.join("breakpad/configure"))
         .current_dir(&dst)
