@@ -98,6 +98,7 @@ pub fn register<H: ExceptionHandler>(descriptor: impl Into<MinidumpDescriptor>, 
     let ctx = Box::into_raw(Box::new(handler.context()));
     match descriptor.into() {
         MinidumpDescriptor::Directory(path) => {
+            // Path on Linux should be nul terminated
             let c_path =
                 unsafe { CStr::from_bytes_with_nul_unchecked(path.as_os_str().as_bytes()) };
             unsafe {
