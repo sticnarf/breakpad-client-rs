@@ -30,6 +30,11 @@ impl FromRawFd for MinidumpDescriptor {
 }
 
 /// Defines the behavior when the program crashes
+///
+/// **Note: You should do as little work as possible in the callback function.
+/// Your application is in an unsafe state. It may not be safe to allocate memory
+/// or call functions from other shared libraries. The safest thing to do is fork
+/// and exec a new process to do any work you need to do.**
 pub trait ExceptionHandler {
     type Context: 'static;
 
