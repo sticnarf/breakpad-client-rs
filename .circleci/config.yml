@@ -1,0 +1,45 @@
+version: 2
+
+defaults: &defaults
+  docker:
+    - image: rust:1
+
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Fetch breakpad source
+          command: git submodule update --init --recursive
+      - run:
+          name: Install build essentials
+          command: apt-get update && apt-get install -y build-essential
+      - run:
+          name: Version information
+          command: rustc --version; cargo --version; rustup --version
+      - run:
+          name: Calculate dependencies
+          command: cargo generate-lockfile
+      - restore_cache:
+          keys:
+            - v4-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Build all targets
+          command: cargo build --all --all-targets
+      - save_cache:
+          paths:
+            - /usr/local/cargo/registry
+            - target/debug/.fingerprint
+            - target/debug/build
+            - target/debug/deps
+          key: v4-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Run all tests
+          command: cargo test --all
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
