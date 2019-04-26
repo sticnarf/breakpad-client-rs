@@ -21,6 +21,7 @@ fn main() -> io::Result<()> {
 
     cc::Build::new()
         .cpp(true)
+        .flag("-std=c++11")
         .include("breakpad/src")
         .file("breakpad_c.cpp")
         .compile("libbreakpad_c.a");
