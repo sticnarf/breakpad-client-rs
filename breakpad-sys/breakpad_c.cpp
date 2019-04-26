@@ -2,6 +2,10 @@
 #include <cstdio>
 #include "breakpad_c.h"
 
+// In order to use custom callbacks, we store the callbacks
+// in the CallbackContext struct. This context struct is passed
+// on registering, so our callback proxy (__filter_callback and
+// __minidump_callback) can call the actual callbacks.
 struct CallbackContext {
     FilterCallback filter;
     WrappedMinidumpCallback callback;
