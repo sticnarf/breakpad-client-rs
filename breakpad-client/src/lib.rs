@@ -1,10 +1,9 @@
 use breakpad_sys::{register_handler_from_fd, register_handler_from_path, DescriptorInfo};
-use std::ffi::CString;
+use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::os::unix::ffi::OsStrExt;
 use std::os::unix::io::{FromRawFd, RawFd};
 use std::path::PathBuf;
-use std::ptr::null_mut;
 
 pub enum MinidumpDescriptor {
     Directory(PathBuf),
@@ -66,22 +65,29 @@ extern "C" fn minidump_callback_wrapper<H: ExceptionHandler>(
 }
 
 pub fn register<H: ExceptionHandler>(handler: H) {
-    match handler.descriptor() {
-        MinidumpDescriptor::Directory(path) => {
-            let path = path.as_os_str().as_bytes();
-            let c_path = CString::new(path).expect("Path contains zero byte");
+    macro_rules! rust_context {
+        () => {{
             let ctx = Box::into_raw(Box::new(handler.context()));
             let context: Box<RustContext<H>> = Box::new(RustContext {
                 filter_callback: H::filter_callback,
                 minidump_callback: H::minidump_callback,
                 ctx,
             });
+            Box::into_raw(context) as *mut c_void
+        }};
+    }
+
+    match handler.descriptor() {
+        MinidumpDescriptor::Directory(path) => {
+            let c_path = CStr::from_bytes_with_nul(path.as_os_str().as_bytes())
+                .expect("Path is not null terminated")
+                .as_ptr();
             unsafe {
                 register_handler_from_path(
-                    c_path.as_ptr(),
+                    c_path,
                     Some(filter_callback_wrapper::<H>),
                     Some(minidump_callback_wrapper::<H>),
-                    Box::into_raw(context) as *mut c_void,
+                    rust_context!(),
                 );
             }
         }
@@ -90,67 +96,11 @@ pub fn register<H: ExceptionHandler>(handler: H) {
                 *fd,
                 Some(filter_callback_wrapper::<H>),
                 Some(minidump_callback_wrapper::<H>),
-                null_mut() as *mut c_void,
+                rust_context!(),
             );
         },
     }
 }
-
-//pub struct ExceptionHandler<C> {
-//    descriptor: MinidumpDescriptor,
-//    context: Option<Box<C>>,
-//    filter: Option<Box<dyn FnOnce(Box<C>) -> bool>>,
-//    callback: Option<Box<dyn FnOnce(MinidumpDescriptor, Box<C>, bool) -> bool>>,
-//}
-//
-//impl<C> ExceptionHandler<C> {
-//    pub fn new(descriptor: impl Into<MinidumpDescriptor>) -> Self {
-//        ExceptionHandler {
-//            descriptor: descriptor.into(),
-//            context: None,
-//            filter: None,
-//            callback: None,
-//        }
-//    }
-//
-//    pub fn context(mut self, context: Box<C>) -> Self {
-//        self.context = Some(context);
-//        self
-//    }
-//
-//    pub fn filter(mut self, filter: Box<dyn FnOnce(Box<C>) -> bool>) -> Self {
-//        self.filter = Some(filter);
-//        self
-//    }
-//
-//    pub fn callback(
-//        mut self,
-//        callback: Box<dyn FnOnce(MinidumpDescriptor, Box<C>, bool) -> bool>,
-//    ) -> Self {
-//        self.callback = Some(callback);
-//        self
-//    }
-//
-//    pub fn register(self) {
-//        match self.descriptor {
-//            MinidumpDescriptor::Directory(path) => {
-//                let path = path.as_os_str().as_bytes();
-//                let c_path = CString::new(path).expect("Path contains zero byte");
-//                unsafe {
-//                    register_handler_from_path(
-//                        c_path.as_ptr(),
-//                        None,
-//                        None,
-//                        null_mut() as *mut c_void,
-//                    );
-//                }
-//            }
-//            MinidumpDescriptor::Fd(fd) => unsafe {
-//                register_handler_from_fd(fd, None, None, null_mut() as *mut c_void);
-//            },
-//        }
-//    }
-//}
 
 #[cfg(test)]
 mod tests {
