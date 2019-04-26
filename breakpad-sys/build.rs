@@ -34,5 +34,9 @@ fn main() -> io::Result<()> {
     );
     println!("cargo:rustc-link-search=native={}", dst.to_str().unwrap());
 
+    println!("cargo:rerun-if-changed=breakpad");
+    println!("cargo:rerun-if-changed=breakpad_c.cpp");
+    println!("cargo:rerun-if-changed=breakpad_c.h");
+
     Ok(())
 }
