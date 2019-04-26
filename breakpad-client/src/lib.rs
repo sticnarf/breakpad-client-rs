@@ -98,12 +98,11 @@ pub fn register<H: ExceptionHandler>(descriptor: impl Into<MinidumpDescriptor>, 
     let ctx = Box::into_raw(Box::new(handler.context()));
     match descriptor.into() {
         MinidumpDescriptor::Directory(path) => {
-            let c_path = CStr::from_bytes_with_nul(path.as_os_str().as_bytes())
-                .expect("Path is not null terminated")
-                .as_ptr();
+            let c_path =
+                unsafe { CStr::from_bytes_with_nul_unchecked(path.as_os_str().as_bytes()) };
             unsafe {
                 register_handler_from_path(
-                    c_path,
+                    c_path.as_ptr(),
                     Some(filter_callback_wrapper::<H>),
                     Some(minidump_callback_wrapper::<H>),
                     ctx as *mut c_void,
