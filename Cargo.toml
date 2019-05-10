@@ -1,7 +1,8 @@
-[workspace]
+[package]
+name = "breakpad-client"
+version = "0.1.0"
+authors = ["Yilin Chen <sticnarf@gmail.com>"]
+edition = "2018"
 
-members = [
-    "breakpad-sys",
-    "breakpad-client",
-    "breakpad-example",
-]
+[dependencies]
+breakpad-sys = { path = "./breakpad-sys" }
