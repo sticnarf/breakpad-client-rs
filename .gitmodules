@@ -1,3 +1,0 @@
-[submodule "breakpad"]
-	path = breakpad-sys/breakpad
-	url = https://github.com/sticnarf/breakpad
