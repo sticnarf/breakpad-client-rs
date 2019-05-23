@@ -7,8 +7,6 @@ to generate minidumps in Rust.
 
 ## Build
 
-Clone this repo and run `git submodule update --init --recursive`.
-
 Make sure your C++ compiler supports C++11.
 
 ## Limitations
